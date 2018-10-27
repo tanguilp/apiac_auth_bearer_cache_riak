@@ -24,10 +24,15 @@ defmodule APISexAuthBearerCacheRiak do
   """
   @impl true
   def put(bearer, attributes, opts) do
-    attributes_r = Riak.CRDT.Register.new(:erlang.term_to_binary(attributes))
+    attributes_b = Riak.CRDT.Register.new(:erlang.term_to_binary(attributes))
+    timestamp_i =
+      :os.system_time(:seconds)
+      |> Integer.to_string()
+      |> Riak.CRDT.Register.new()
 
     Riak.CRDT.Map.new()
-    |> Riak.CRDT.Map.put("attrs", attributes_r)
+    |> Riak.CRDT.Map.put("attrs", attributes_b)
+    |> Riak.CRDT.Map.put("iat_i", timestamp_i)
     |> Riak.update(opts[:bucket_type], opts[:bucket_name], bearer)
   end
 
@@ -37,7 +42,7 @@ defmodule APISexAuthBearerCacheRiak do
   @impl true
   def get(bearer, opts) do
     case Riak.CRDT.Map.value(Riak.find(opts[:bucket_type], opts[:bucket_name], bearer)) do
-      [{{"attrs", :register}, serialized_attrs}] ->
+      [{{"attrs", :register}, serialized_attrs} | _] ->
         :erlang.binary_to_term(serialized_attrs)
 
       _ ->
