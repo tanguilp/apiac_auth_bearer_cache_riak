@@ -26,6 +26,7 @@ defmodule APISexAuthBearerCacheRiak.MixProject do
     [
       {:apisex_auth_bearer, github: "tanguilp/apisex_auth_bearer", tag: "master"},
       {:riak, "~> 1.1.6"},
+      {:singleton, "~> 1.2.0"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end

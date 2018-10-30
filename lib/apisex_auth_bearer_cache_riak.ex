@@ -1,9 +1,6 @@
 defmodule APISexAuthBearerCacheRiak do
   @behaviour APISexAuthBearer.Cache
 
-  @bucket_type "dist_cache"
-  @bucket_name "bearers"
-
   @moduledoc """
   Implementation of the `APISexAuthBearer.Cache` behaviour with
   Riak as a distributed cache
@@ -15,8 +12,7 @@ defmodule APISexAuthBearerCacheRiak do
   @impl true
   def init_opts(opts) do
     opts
-    |> Keyword.put_new(:bucket_type, @bucket_type)
-    |> Keyword.put_new(:bucket_name, @bucket_name)
+    |> Keyword.put_new(:ttl, 200)
   end
 
   @doc """
@@ -30,10 +26,14 @@ defmodule APISexAuthBearerCacheRiak do
       |> Integer.to_string()
       |> Riak.CRDT.Register.new()
 
+    bucket_type = Application.get_env(:apisex_auth_bearer_cache_riak, :bucket_type)
+    bucket_name = Application.get_env(:apisex_auth_bearer_cache_riak, :bucket_name)
+
     Riak.CRDT.Map.new()
     |> Riak.CRDT.Map.put("attrs", attributes_b)
     |> Riak.CRDT.Map.put("iat_i", timestamp_i)
-    |> Riak.update(opts[:bucket_type], opts[:bucket_name], bearer)
+    |> Riak.CRDT.Map.put("test_s", Riak.CRDT.Register.new(Enum.random(["pierre", "paul", "jacques"])))
+    |> Riak.update(bucket_type, bucket_name, bearer)
   end
 
   @doc """
@@ -41,8 +41,12 @@ defmodule APISexAuthBearerCacheRiak do
   """
   @impl true
   def get(bearer, opts) do
-    case Riak.CRDT.Map.value(Riak.find(opts[:bucket_type], opts[:bucket_name], bearer)) do
-      [{{"attrs", :register}, serialized_attrs} | _] ->
+    bucket_type = Application.get_env(:apisex_auth_bearer_cache_riak, :bucket_type)
+    bucket_name = Application.get_env(:apisex_auth_bearer_cache_riak, :bucket_name)
+
+    case Riak.CRDT.Map.value(Riak.find(bucket_type, bucket_name, bearer)) do
+      [{{"attrs", :register}, serialized_attrs} | _] = val ->
+        IO.inspect(val)
         :erlang.binary_to_term(serialized_attrs)
 
       _ ->

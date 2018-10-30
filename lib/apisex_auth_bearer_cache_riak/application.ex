@@ -6,15 +6,10 @@ defmodule APISexAuthBearerCacheRiak.Application do
   use Application
 
   def start(_type, _args) do
-    # List all child processes to be supervised
-    children = [
-      # Starts a worker by calling: APISexAuthBearerCacheRiak.Worker.start_link(arg)
-      # {APISexAuthBearerCacheRiak.Worker, arg},
-    ]
+    cleaning_interval = Application.get_env(:apisex_auth_bearer_cache_riak, :cleaning_interval)
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: APISexAuthBearerCacheRiak.Supervisor]
-    Supervisor.start_link(children, opts)
+    Singleton.start_child(APISexAuthBearerCacheRiak.Cleaner,
+                          cleaning_interval,
+                          :apisex_auth_bearer_cache_riak_cleaner)
   end
 end

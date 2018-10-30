@@ -9,3 +9,8 @@ config :pooler, pools: [
     start_mfa: {Riak.Connection, :start_link, ['127.0.0.1', 8087]}
   ]
 ]
+
+config :apisex_auth_bearer_cache_riak, bucket_type: "dist_cache",
+                                       bucket_name: "bearers",
+                                       index_name: "expirable_token",
+                                       cleaning_interval: 60 * 10
