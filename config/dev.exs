@@ -10,7 +10,6 @@ config :pooler, pools: [
   ]
 ]
 
-config :apisex_auth_bearer_cache_riak, bucket_type: "dist_cache",
-                                       bucket_name: "bearers",
-                                       index_name: "expirable_token",
-                                       cleaning_interval: 60 * 10
+config :apiac_auth_bearer_cache_riak,
+  bucket_type: "apiac_auth_bearer_cache_riak_token_cache",
+  cleaning_interval: 60
