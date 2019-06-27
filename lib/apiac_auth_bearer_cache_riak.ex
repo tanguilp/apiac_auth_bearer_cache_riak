@@ -11,7 +11,7 @@ defmodule APIacAuthBearerCacheRiak do
   @doc """
   Installs the index and schema on a bucket
 
-  The installed schema disables idnexing of the bearer attributes for performance reason. The
+  The installed schema disables indexing of the bearer attributes for performance reason. The
   following elements are installed:
   - schema (apiac_auth_bearer_cache_riak_schema)
   - index (apiac_auth_bearer_cache_riak_index)
